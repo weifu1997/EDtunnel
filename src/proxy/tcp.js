@@ -157,11 +157,15 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
 	}
 
-	// SOCKS5 residential proxy egress pool for Twitter/OpenAI/Netflix
+	// Multi-Tier SOCKS5 residential proxy egress pool for Twitter/OpenAI/Netflix
 	const socks5Pool = [
-		'142.54.236.97:4145',
-		'72.37.216.68:4145',
-		'142.54.237.34:4145',
+		'174.64.199.82:4145',
+		'72.195.34.42:4145',
+		'192.111.137.34:18765',
+		'192.111.135.17:18302',
+		'192.252.214.20:15864',
+		'184.170.245.148:4145',
+		'70.166.65.160:4145',
 	];
 
 	// Domains that block Cloudflare egress IPs and must route through SOCKS5 / ProxyIP egress
