@@ -28,9 +28,10 @@ export function getConfig(userIDs, hostName, proxyIP, trojanPassword = null) {
 	const trojanCommonUrlPart = `?security=tls&type=ws&host=${hostName}&path=%2F%3Fed%3D2048&sni=${hostName}#${hostName}`;
 
 	// Prepare output string for each userID
-	const sublink = `https://${hostName}/sub/${userIDArray[0]}?format=clash`;
-	const subbestip = `https://${hostName}/bestip/${userIDArray[0]}`;
-	const clash_link = `https://url.v1.mk/sub?target=clash&url=${encodeURIComponent(`https://${hostName}/sub/${userIDArray[0]}?format=clash`)}&insert=false&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
+	const subConfigUrl = encodeURIComponent("https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full_NoAuto.ini");
+	const rawSubUrl = encodeURIComponent(`https://${hostName}/sub/${userIDArray[0]}`);
+	const clash_link = `https://url.v1.mk/sub?target=clash&url=${rawSubUrl}&config=${subConfigUrl}&insert=false&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
+	const clash_install = `clash://install-config?url=${encodeURIComponent(clash_link)}`;
 
 	// HTML Head with CSS and FontAwesome library
 	const htmlHead = `
@@ -179,9 +180,8 @@ export function getConfig(userIDs, hostName, proxyIP, trojanPassword = null) {
       <div class="btn-group">
         <a href="//${hostName}/sub/${userIDArray[0]}" class="btn" target="_blank"><i class="fas fa-link"></i> VLESS Subscription</a>
         <a href="//${hostName}/trojan/${userIDArray[0]}" class="btn" target="_blank"><i class="fas fa-shield-alt"></i> Trojan Subscription</a>
-        <a href="clash://install-config?url=${encodeURIComponent(`https://${hostName}/sub/${userIDArray[0]}?format=clash`)}" class="btn" target="_blank"><i class="fas fa-bolt"></i> Clash Subscription</a>
+        <a href="${clash_install}" class="btn" target="_blank"><i class="fas fa-bolt"></i> Clash Subscription</a>
         <a href="${clash_link}" class="btn" target="_blank"><i class="fas fa-bolt"></i> Clash Link</a>
-        <a href="${subbestip}" class="btn" target="_blank"><i class="fas fa-star"></i> Best IP Subscription</a>
       </div>
       <div class="subscription-info">
         <h3>Options Explained:</h3>

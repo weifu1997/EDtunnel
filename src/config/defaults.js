@@ -18,7 +18,7 @@ export const defaultTrojanPassword = '';
  * Array of proxy server addresses with ports
  * Format: ['hostname:port', 'hostname:port']
  */
-export const proxyIPs = ['cdn.xn--b6gac.eu.org:443', 'cdn-all.xn--b6gac.eu.org:443'];
+export const proxyIPs = ['cdn-all.xn--b6gac.eu.org:443', 'proxyip.edtunnel.best:443', '47.243.118.63:443'];
 
 /**
  * Default SOCKS5 proxy configuration
