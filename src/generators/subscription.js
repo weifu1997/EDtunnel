@@ -14,15 +14,12 @@ import { proxyIPs } from '../config/defaults.js';
  * @returns {string} Base64 encoded subscription content
  */
 export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
-	// Add only high quality CloudFlare public CNAME domains
+	// Add ONLY true ultra-fast Asia-Pacific Anycast CNAME domains
 	const mainDomains = new Set([
-		hostname,
-		'cf.090227.xyz',
-		'saas.sin.fan',
-		'cdn.tzpro.xyz',
-		'cf.0sm.com',
-		'cloudflare-ip.mofashi.ltd',
-		...proxyIPs,
+		'saas.sin.fan',         // Singapore Anycast (~70ms)
+		'cf.090227.xyz',        // HK/SG Fast Anycast (~70ms)
+		'cf.hw.090227.xyz',     // Huawei Cloud HK (~70ms)
+		'cf.0sm.com',           // Optimized CDN
 	]);
 
 	const userIDArray = userID_path.includes(',') ? userID_path.split(",") : [userID_path];
@@ -74,10 +71,12 @@ function generateTrojanUrls(password, hostname, proxyIPArray) {
 	const commonParams = `?security=tls&type=ws&host=${hostname}&path=%2F%3Fed%3D2048&sni=${hostname}`;
 
 	// Main hostname Trojan URLs (HTTPS ports only)
-	Array.from(HttpsPort).forEach((port) => {
-		const urlPart = `${hostname.split('.')[0]}-Trojan-HTTPS-${port}`;
-		const trojanUrl = `${atob(trojanPt)}://${encodedPassword}@${hostname}:${port}${commonParams}#${urlPart}`;
-		urls.push(trojanUrl);
+	mainDomains.forEach(domain => {
+		Array.from(HttpsPort).forEach((port) => {
+			const urlPart = `${domain}-Trojan-HTTPS-${port}`;
+			const trojanUrl = `${atob(trojanPt)}://${encodedPassword}@${domain}:${port}${commonParams}#${urlPart}`;
+			urls.push(trojanUrl);
+		});
 	});
 
 	// Proxy IP Trojan URLs
