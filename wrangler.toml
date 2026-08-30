@@ -7,10 +7,10 @@ workers_dev = true
 # 专属认证密钥
 UUID = "1b6c1745-992e-4aac-8685-266c090e50ea"
 
-# 🚀 毫秒级极速 ProxyIP 负载均衡池（彻底搞定 Twitter/YouTube/Google 访问拦截与超时）
-PROXYIP = "cdn-all.xn--b6gac.eu.org,proxyip.edtunnel.best,47.243.118.63:443"
+# 🚀 使用你自己的新加坡独立原生 VPS 当私享 PROXYIP 出口（100% 解锁 Twitter/YouTube）
+PROXYIP = "43.156.148.165:9443"
 
-# 🌏 亚太极速优选 CNAME 域名池（中国大陆 70ms 极速 Anycast 入口）
+# 🌏 亚太极速优选 CNAME 域名池
 ADD = "saas.sin.fan,cf.090227.xyz,cf.hw.090227.xyz,cf.0sm.com"
 
 # 代理超时与容灾配置
