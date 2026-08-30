@@ -113,9 +113,8 @@ export async function protocolOverWSHandler(request, config, connect) {
 					const rawClientData = chunk.slice(rawDataIndex);
 					return handleDNSQuery(rawClientData, webSocket, protocolResponseHeader, log, connect);
 				} else {
-					// Silent fallback / close non-DNS UDP (like QUIC/HTTP3) gracefully without crashing WS stream
-					log(`[UDP] Unsupported UDP port ${portRemote} (HTTP/3 QUIC dropped, fallback to TCP)`);
-					safeCloseWebSocket(webSocket);
+					// Drop non-DNS UDP packets (like QUIC/HTTP3) silently without closing the underlying WebSocket stream
+					log(`[UDP] Ignoring non-DNS UDP port ${portRemote} (lets browser naturally use TCP HTTPS)`);
 					return;
 				}
 			}
