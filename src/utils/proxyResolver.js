@@ -233,9 +233,11 @@ export async function connectWithRotation(proxyAddresses, initialData, connect, 
 			]);
 
 			// Write initial data
-			const writer = socket.writable.getWriter();
-			await writer.write(initialData);
-			writer.releaseLock();
+			if (initialData && initialData.byteLength > 0) {
+				const writer = socket.writable.getWriter();
+				await writer.write(initialData);
+				writer.releaseLock();
+			}
 
 			log(`[ProxyRotation] Connected to ${address}:${port}`);
 			cachedProxyIndex = index;

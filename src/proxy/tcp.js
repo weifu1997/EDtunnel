@@ -81,9 +81,11 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 	async function connectDirect(address, port) {
 		log(`[TCP] Direct connecting to ${address}:${port}`);
 		const tcpSocket = connect({ hostname: address, port: port });
-		const writer = tcpSocket.writable.getWriter();
-		await writer.write(rawClientData);
-		writer.releaseLock();
+		if (rawClientData && rawClientData.byteLength > 0) {
+			const writer = tcpSocket.writable.getWriter();
+			await writer.write(rawClientData);
+			writer.releaseLock();
+		}
 		return tcpSocket;
 	}
 
