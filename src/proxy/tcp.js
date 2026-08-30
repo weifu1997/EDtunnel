@@ -155,6 +155,28 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
 	}
 
+	// Domains that block Cloudflare egress IPs and must route through ProxyIP / WARP egress
+	const blockedDomains = [
+		'twitter.com',
+		'x.com',
+		'twimg.com',
+		't.co',
+		'openai.com',
+		'chatgpt.com',
+		'oaistatic.com',
+		'oaiusercontent.com',
+		'netflix.com',
+		'nflxvideo.net',
+		'claude.ai',
+		'anthropic.com',
+	];
+
+	function isBlockedDomain(domain) {
+		if (!domain) return false;
+		const d = domain.toLowerCase();
+		return blockedDomains.some(b => d === b || d.endsWith('.' + b));
+	}
+
 	// Main connection logic
 	let tcpSocket;
 
@@ -184,8 +206,21 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 
 		log(`[TCP] Calling remoteSocketToWS`);
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
+	} else if (config.proxyIP && isBlockedDomain(addressRemote)) {
+		// High-risk domain (Twitter, OpenAI, Netflix): prioritize ProxyIP egress to bypass Cloudflare block
+		log(`[TCP] Target ${addressRemote} is a high-risk domain, routing through ProxyIP egress...`);
+		try {
+			tcpSocket = await connectWithProxyRotation(true);
+			remoteSocket.value = tcpSocket;
+			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
+		} catch (err) {
+			log(`[TCP] ProxyIP routing failed: ${err.message}, fallback to direct`);
+			tcpSocket = await connectDirect(addressRemote, portRemote);
+			remoteSocket.value = tcpSocket;
+			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
+		}
 	} else {
-		// Standard mode: try direct first with instant response, fallback to proxy rotation if direct blocked
+		// Standard mode: direct connection
 		try {
 			tcpSocket = await connectDirect(addressRemote, portRemote);
 			remoteSocket.value = tcpSocket;
