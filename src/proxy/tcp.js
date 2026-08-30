@@ -208,15 +208,14 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 
 		log(`[TCP] Calling remoteSocketToWS`);
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
-	} else if (config.proxyIP && isBlockedDomain(addressRemote)) {
-		// High-risk domain (Twitter, OpenAI, Netflix): prioritize ProxyIP egress to bypass Cloudflare block
-		log(`[TCP] Target ${addressRemote} is a high-risk domain, routing through ProxyIP egress...`);
+	} else if (config.proxyIP) {
+		// If PROXYIP is present, route through proxy rotation (with direct fallback) to avoid Cloudflare egress blocks
 		try {
-			tcpSocket = await connectWithProxyRotation(true);
+			tcpSocket = await connectWithProxyRotation(config.enableProxyFallback !== false);
 			remoteSocket.value = tcpSocket;
 			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
 		} catch (err) {
-			log(`[TCP] ProxyIP routing failed: ${err.message}, fallback to direct`);
+			log(`[TCP] Proxy rotation failed: ${err.message}, fallback to direct`);
 			tcpSocket = await connectDirect(addressRemote, portRemote);
 			remoteSocket.value = tcpSocket;
 			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
