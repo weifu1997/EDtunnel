@@ -140,18 +140,12 @@ export async function resolveProxyAddresses(proxyIP, targetDomain = 'cloudflare.
 		const ipv6Regex = /^\[?([a-fA-F0-9:]+)\]?$/;
 
 		if (!ipv4Regex.test(address) && !ipv6Regex.test(address)) {
-			// Resolve domain to IPs using DoH
-			const [aRecords, aaaaRecords] = await Promise.all([
-				dohQuery(address, 'A'),
-				dohQuery(address, 'AAAA')
-			]);
-
+			// Resolve domain to IPs using DoH - prioritize IPv4 to avoid Cloudflare IPv6 egress throttling
+			const aRecords = await dohQuery(address, 'A');
 			const ipv4List = aRecords.filter(r => r.type === 1).map(r => r.data);
-			const ipv6List = aaaaRecords.filter(r => r.type === 28).map(r => `[${r.data}]`);
-			const ipAddresses = [...ipv4List, ...ipv6List];
 
-			proxyAddresses = ipAddresses.length > 0
-				? ipAddresses.map(ip => [ip, port])
+			proxyAddresses = ipv4List.length > 0
+				? ipv4List.map(ip => [ip, port])
 				: [[address, port]];
 		} else {
 			proxyAddresses = [[address, port]];
