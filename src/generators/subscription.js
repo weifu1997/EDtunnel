@@ -32,7 +32,7 @@ export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 		// Generate main HTTPS URLs for pure ultra-fast domains
 		mainDomains.forEach(domain => {
 			Array.from(HttpsPort).forEach((port) => {
-				const urlPart = `⚡CF-${domain}-HTTPS-${port}`;
+				const urlPart = `CF-${domain}-HTTPS-${port}`;
 				const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + domain + ':' + port + commonUrlPartHttps + urlPart;
 				allUrls.push(mainProtocolHttps);
 			});
@@ -41,7 +41,7 @@ export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 		// Generate proxy HTTPS URLs
 		proxyIPArray.forEach((proxyAddr) => {
 			const [proxyHost, proxyPort = '443'] = proxyAddr.split(':');
-			const urlPart = `⚡CF-${proxyHost}-HTTPS-${proxyPort}`;
+			const urlPart = `CF-${proxyHost}-HTTPS-${proxyPort}`;
 			const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyHost + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + atob(ed);
 			allUrls.push(secondaryProtocolHttps);
 		});
@@ -71,7 +71,7 @@ function generateTrojanUrls(password, hostname, proxyIPArray) {
 	// Main hostname Trojan URLs (HTTPS ports only)
 	mainDomains.forEach(domain => {
 		Array.from(HttpsPort).forEach((port) => {
-			const urlPart = `⚡Trojan-${domain}-HTTPS-${port}`;
+			const urlPart = `Trojan-${domain}-HTTPS-${port}`;
 			const trojanUrl = `${atob(trojanPt)}://${encodedPassword}@${domain}:${port}${commonParams}#${urlPart}`;
 			urls.push(trojanUrl);
 		});
@@ -80,7 +80,7 @@ function generateTrojanUrls(password, hostname, proxyIPArray) {
 	// Proxy IP Trojan URLs
 	proxyIPArray.forEach((proxyAddr) => {
 		const [proxyHost, proxyPort = '443'] = proxyAddr.split(':');
-		const urlPart = `⚡Trojan-${proxyHost}-${proxyPort}`;
+		const urlPart = `Trojan-${proxyHost}-${proxyPort}`;
 		const trojanUrl = `${atob(trojanPt)}://${encodedPassword}@${proxyHost}:${proxyPort}${commonParams}#${urlPart}`;
 		urls.push(trojanUrl);
 	});
