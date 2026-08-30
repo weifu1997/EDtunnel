@@ -14,37 +14,15 @@ import { proxyIPs } from '../config/defaults.js';
  * @returns {string} Base64 encoded subscription content
  */
 export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
-	// Add all CloudFlare public CNAME domains
+	// Add only high quality CloudFlare public CNAME domains
 	const mainDomains = new Set([
 		hostname,
-		// public domains
-		'icook.hk',
-		'japan.com',
-		'malaysia.com',
-		'russia.com',
-		'singapore.com',
-		'www.visa.com',
-		'www.csgo.com',
-		'www.shopify.com',
-		'www.whatismyip.com',
-		'www.ipget.net',
-		// High frequency update sources
-		'freeyx.cloudflare88.eu.org',    // 1000ip/3min
-		'cloudflare.182682.xyz',         // 15ip/15min
-		'cfip.cfcdn.vip',                // 6ip/1day
-		...proxyIPs,
-		// Manual update and unknown frequency
+		'cf.090227.xyz',
+		'saas.sin.fan',
+		'cdn.tzpro.xyz',
 		'cf.0sm.com',
 		'cloudflare-ip.mofashi.ltd',
-		'cf.090227.xyz',
-		'cf.zhetengsha.eu.org',
-		'cloudflare.9jy.cc',
-		'cf.zerone-cdn.pp.ua',
-		'cfip.1323123.xyz',
-		'cdn.tzpro.xyz',
-		'cf.877771.xyz',
-		'cnamefuckxxs.yuchen.icu',
-		'cfip.xxxxxxxx.tk',              // OTC maintained
+		...proxyIPs,
 	]);
 
 	const userIDArray = userID_path.includes(',') ? userID_path.split(",") : [userID_path];
@@ -55,16 +33,6 @@ export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 
 	const result = userIDArray.flatMap((userID) => {
 		let allUrls = [];
-		// Generate main HTTP URLs first for all domains (except pages.dev)
-		if (!hostname.includes('pages.dev')) {
-			mainDomains.forEach(domain => {
-				Array.from(HttpPort).forEach((port) => {
-					const urlPart = `${hostname.split('.')[0]}-${domain}-HTTP-${port}`;
-					const mainProtocolHttp = atob(pt) + '://' + userID + atob(at) + domain + ':' + port + commonUrlPartHttp + urlPart;
-					allUrls.push(mainProtocolHttp);
-				});
-			});
-		}
 
 		// Generate main HTTPS URLs for all domains
 		mainDomains.forEach(domain => {
