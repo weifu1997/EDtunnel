@@ -157,7 +157,14 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
 	}
 
-	// Domains that block Cloudflare egress IPs and must route through ProxyIP / WARP egress
+	// SOCKS5 residential proxy egress pool for Twitter/OpenAI/Netflix
+	const socks5Pool = [
+		'142.54.236.97:4145',
+		'72.37.216.68:4145',
+		'142.54.237.34:4145',
+	];
+
+	// Domains that block Cloudflare egress IPs and must route through SOCKS5 / ProxyIP egress
 	const blockedDomains = [
 		'twitter.com',
 		'x.com',
@@ -208,14 +215,26 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 
 		log(`[TCP] Calling remoteSocketToWS`);
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
-	} else if (config.proxyIP) {
-		// If PROXYIP is present, route through proxy rotation (with direct fallback) to avoid Cloudflare egress blocks
-		try {
-			tcpSocket = await connectWithProxyRotation(config.enableProxyFallback !== false);
-			remoteSocket.value = tcpSocket;
-			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
-		} catch (err) {
-			log(`[TCP] Proxy rotation failed: ${err.message}, fallback to direct`);
+	} else if (isBlockedDomain(addressRemote)) {
+		// Target is Twitter / OpenAI / Netflix: route via SOCKS5 residential egress pool
+		log(`[TCP] High-risk target ${addressRemote} detected, routing through SOCKS5 pool...`);
+		let connected = false;
+		for (const s5 of socks5Pool) {
+			try {
+				const [sHost, sPort] = s5.split(':');
+				const sSocket = await socks5Connect(addressType, addressRemote, portRemote, log, { hostname: sHost, port: parseInt(sPort, 10) }, connect);
+				if (sSocket) {
+					remoteSocket.value = sSocket;
+					remoteSocketToWS(sSocket, webSocket, protocolResponseHeader, null, log);
+					connected = true;
+					break;
+				}
+			} catch (e) {
+				log(`[TCP] SOCKS5 ${s5} failed: ${e.message}`);
+			}
+		}
+		if (!connected) {
+			log(`[TCP] All SOCKS5 failed, trying direct connection`);
 			tcpSocket = await connectDirect(addressRemote, portRemote);
 			remoteSocket.value = tcpSocket;
 			remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
