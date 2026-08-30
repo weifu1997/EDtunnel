@@ -107,10 +107,17 @@ export async function protocolOverWSHandler(request, config, connect) {
 				} else if (portRemote === 53) {
 					// Fallback to DNS-only mode when no UDP-capable outbound
 					isDns = true;
+					const protocolResponseHeader = protocolType === 'trojan'
+						? null
+						: new Uint8Array([protocolVersion[0], 0]);
+					const rawClientData = chunk.slice(rawDataIndex);
+					return handleDNSQuery(rawClientData, webSocket, protocolResponseHeader, log, connect);
 				} else {
-					throw new Error('UDP proxy requires VLESS outbound configuration');
+					// Silent fallback / close non-DNS UDP (like QUIC/HTTP3) gracefully without crashing WS stream
+					log(`[UDP] Unsupported UDP port ${portRemote} (HTTP/3 QUIC dropped, fallback to TCP)`);
+					safeCloseWebSocket(webSocket);
+					return;
 				}
-				return; // Early return after setting isDns or throwing error
 			}
 			// Protocol response header: VLESS needs 2-byte header, Trojan needs none
 			const protocolResponseHeader = protocolType === 'trojan'
