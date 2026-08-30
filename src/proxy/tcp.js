@@ -185,7 +185,19 @@ export async function handleTCPOutBound(remoteSocket, addressType, addressRemote
 		log(`[TCP] Calling remoteSocketToWS`);
 		remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, null, log);
 	} else {
-		// Standard mode: try direct first, then retry with proxy
+		// If PROXYIP is configured, prioritize proxy rotation to avoid Cloudflare egress blocks (Twitter/YouTube/OpenAI)
+		if (config.proxyIP) {
+			try {
+				tcpSocket = await connectWithProxyRotation(config.enableProxyFallback !== false);
+				remoteSocket.value = tcpSocket;
+				remoteSocketToWS(tcpSocket, webSocket, protocolResponseHeader, retry, log);
+				return;
+			} catch (err) {
+				log(`[TCP] Proxy rotation failed: ${err.message}, falling back to direct`);
+			}
+		}
+
+		// Standard mode: direct connection
 		try {
 			tcpSocket = await connectDirect(addressRemote, portRemote);
 			remoteSocket.value = tcpSocket;
