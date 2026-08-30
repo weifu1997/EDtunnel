@@ -24,26 +24,19 @@ const mainDomains = [
 export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 	const userIDArray = userID_path.includes(',') ? userID_path.split(",") : [userID_path];
 	const proxyIPArray = Array.isArray(proxyIP) ? proxyIP : (proxyIP ? (proxyIP.includes(',') ? proxyIP.split(',') : [proxyIP]) : proxyIPs);
+	const targetDomains = new Set([hostname, ...mainDomains]);
 	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
 
 	const result = userIDArray.flatMap((userID) => {
 		let allUrls = [];
 
 		// Generate main HTTPS URLs for pure ultra-fast domains
-		mainDomains.forEach(domain => {
+		targetDomains.forEach(domain => {
 			Array.from(HttpsPort).forEach((port) => {
 				const urlPart = `CF-${domain}-HTTPS-${port}`;
 				const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + domain + ':' + port + commonUrlPartHttps + urlPart;
 				allUrls.push(mainProtocolHttps);
 			});
-		});
-
-		// Generate proxy HTTPS URLs
-		proxyIPArray.forEach((proxyAddr) => {
-			const [proxyHost, proxyPort = '443'] = proxyAddr.split(':');
-			const urlPart = `CF-${proxyHost}-HTTPS-${proxyPort}`;
-			const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyHost + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + atob(ed);
-			allUrls.push(secondaryProtocolHttps);
 		});
 
 		return allUrls;
