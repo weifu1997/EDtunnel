@@ -16,15 +16,24 @@ let cachedProxyIndex = 0;
  */
 async function dohQuery(domain, recordType) {
 	try {
-		const response = await fetch(`https://1.1.1.1/dns-query?name=${domain}&type=${recordType}`, {
+		const response = await fetch(`https://dns.google/resolve?name=${domain}&type=${recordType}`, {
 			headers: { 'Accept': 'application/dns-json' }
 		});
 		if (!response.ok) return [];
 		const data = await response.json();
 		return data.Answer || [];
 	} catch (error) {
-		console.error(`DoH query failed (${recordType}):`, error);
-		return [];
+		try {
+			const fallback = await fetch(`https://1.1.1.1/dns-query?name=${domain}&type=${recordType}`, {
+				headers: { 'Accept': 'application/dns-json' }
+			});
+			if (!fallback.ok) return [];
+			const data = await fallback.json();
+			return data.Answer || [];
+		} catch (e) {
+			console.error(`DoH query failed (${recordType}):`, e);
+			return [];
+		}
 	}
 }
 

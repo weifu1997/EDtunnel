@@ -17,7 +17,7 @@ export async function handleDNSQuery(udpChunk, webSocket, protocolResponseHeader
 	// Always use hardcoded DNS server regardless of client request
 	// Some DNS servers don't support DNS over TCP
 	try {
-		const dnsServer = '8.8.4.4'; // change to 1.1.1.1 after cf fix connect own ip bug
+		const dnsServer = '8.8.8.8'; // Primary Google Public DNS over TCP
 		const dnsPort = 53;
 		/** @type {ArrayBuffer | null} */
 		let vlessHeader = protocolResponseHeader;
