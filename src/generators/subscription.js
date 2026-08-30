@@ -25,7 +25,8 @@ export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 	const userIDArray = userID_path.includes(',') ? userID_path.split(",") : [userID_path];
 	const proxyIPArray = Array.isArray(proxyIP) ? proxyIP : (proxyIP ? (proxyIP.includes(',') ? proxyIP.split(',') : [proxyIP]) : proxyIPs);
 	const targetDomains = new Set([hostname, ...mainDomains]);
-	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
+	const effectiveProxyIP = proxyIPArray[0] || 'cdn.tzpro.xyz:443';
+	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fproxyip%3D${encodeURIComponent(effectiveProxyIP)}%26ed%3D2048#`;
 
 	const result = userIDArray.flatMap((userID) => {
 		let allUrls = [];
@@ -59,7 +60,8 @@ export function genSub(userID_path, hostname, proxyIP, trojanPassword = null) {
 function generateTrojanUrls(password, hostname, proxyIPArray) {
 	const urls = [];
 	const encodedPassword = encodeURIComponent(password);
-	const commonParams = `?security=tls&type=ws&host=${hostname}&path=%2F%3Fed%3D2048&sni=${hostname}`;
+	const effectiveProxyIP = proxyIPArray[0] || 'cdn.tzpro.xyz:443';
+	const commonParams = `?security=tls&type=ws&host=${hostname}&path=%2F%3Fproxyip%3D${encodeURIComponent(effectiveProxyIP)}%26ed%3D2048&sni=${hostname}`;
 
 	// Main hostname Trojan URLs (HTTPS ports only)
 	mainDomains.forEach(domain => {
